@@ -22,22 +22,30 @@ def build_model(arch, hidden_units, output_units, gpu):
     model.to("cuda" if gpu else "cpu")
     return model
 
-def save_model(model, loss, epochs, learnrate, optimizer, class_to_idx, save_dir):
+def save_model(model, arch, loss, epochs, learnrate, optimizer, class_to_idx, save_dir):
     '''save model, loss function, epochs, learnrate, optimizer and mapping in checkpoint'''
-    model.class_to_idx = class_to_idx
-
     checkpoint = {"batch_size": 32,
-                  "model": model,
+                  "arch": arch,
+                  "model_state": model.state_dict(),
+                  "classifier": model.classifier,
+                  "class_to_idx": class_to_idx,
                   "loss": loss,
                   "epochs": epochs,
                   "learnrate": learnrate,
-                  "optimizer_state": optimizer.state_dict}
-    torch.save(checkpoint, "checkpoint.pth")
+                  "optimizer_state": optimizer.state_dict()}
+    filename = ""
+    filename = "/checkpoint.pth" if save_dir else "checkpoint.pth"
+    torch.save(checkpoint, save_dir + filename)
 
 def load_model(path):
     '''load model from checkpoint'''
     checkpoint = torch.load(path)
-    return checkpoint["model"]
+    model = getattr(models, checkpoint['arch'])(pretrained=True)
+    model.classifier = checkpoint['classifier']
+    model.load_state_dict(checkpoint['model_state'])
+    model.optimizer = checkpoint['optimizer_state']
+    model.class_to_idx = checkpoint['class_to_idx']
+    return model
 
 def train(model, criterion, optimizer, trainloader, validloader, epochs, gpu):
     '''train model'''

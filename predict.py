@@ -14,22 +14,17 @@ parser.add_argument('--gpu', action='store_true', help="Use GPU for training (De
 args = parser.parse_args()
 
 #load name mapping from json file
-cat_to_name = utility.load_mapping(args.mapping_path)
+cat_to_name = utility.load_mapping(args.mapping_path) if args.mapping_path!="" else {}
 
 #load model from checkpoint
-model = learning.load_model(args.checkpoint_path) 
+model = learning.load_model(args.checkpoint_path)
 
 #predict classes and propabilities
 ps, preds = learning.predict(args.img_path, model, args.top_k, args.gpu)
 
 #map classes to names
-pred_names = [cat_to_name[pred] for pred in preds]
+preds = [cat_to_name[pred] for pred in preds] if cat_to_name else preds
 
 #print results
-for name, prob in zip(pred_names, ps[-1,:]):
+for name, prob in zip(preds, ps[-1,:]):
     print("Class: {}, Propability: {}%".format(name, prob*100))
-
-
-
-
-

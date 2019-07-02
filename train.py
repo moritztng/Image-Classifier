@@ -28,4 +28,4 @@ optimizer = optim.Adam(model.classifier.parameters(), lr = args.learning_rate)
 learning.train(model, criterion, optimizer, trainloader, validloader, args.epochs, args.gpu)
 
 #save checkpoint
-learning.save_model(model, criterion, args.epochs, args.learning_rate, optimizer, class_to_idx, args.save_dir)
+learning.save_model(model, args.arch, criterion, args.epochs, args.learning_rate, optimizer, class_to_idx, args.save_dir)
